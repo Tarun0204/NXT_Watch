@@ -14,9 +14,15 @@ import './App.css'
 
 class App extends Component {
   state = {
-    savedVideos: [],
+    savedVideos: JSON.parse(localStorage.getItem('savedVideos')) || [],
     isDarkTheme: false,
     activeTab: 'Home',
+  }
+
+  componentDidUpdate(prevState) {
+    if (prevState.savedVideos !== this.state.savedVideos) {
+      localStorage.setItem('savedVideos', JSON.stringify(this.state.savedVideos))
+    }
   }
 
   changeTab = tab => {
