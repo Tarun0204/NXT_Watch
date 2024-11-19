@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import Cookies from 'js-cookie'
-import { Navigate } from 'react-router-dom'
+import { withRouter } from 'react-router-dom'
 import {
   InputFieldContainer,
   LoginInputFieldLabel,
@@ -133,4 +133,4 @@ class Login extends Component {
   }
 }
 
-export default Login
+export default withRouter(Login)
