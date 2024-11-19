@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { Component } from 'react'
 import Cookies from 'js-cookie'
-import { useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import {
   InputFieldContainer,
   LoginInputFieldLabel,
@@ -15,27 +15,28 @@ import {
   CheckboxLabel,
 } from './styledComponents'
 
-const Login = () => {
-  const [usernameInput, setUsernameInput] = useState('')
-  const [passwordInput, setPasswordInput] = useState('')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [showErrorMsg, setShowErrorMsg] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
+class Login extends Component {
+  state = {
+    usernameInput: '',
+    passwordInput: '',
+    errorMsg: '',
+    showErrorMsg: false,
+    showPassword: false,
+    redirectToHome: false, // New state for redirection
+  }
 
-  const onSuccessLogin = jwtToken => {
+  onSuccessLogin = jwtToken => {
     Cookies.set('jwt_token', jwtToken, { expires: 30 })
-    navigate('/')
+    this.setState({ redirectToHome: true }) // Set to true when login is successful
   }
 
-  const onFailureLogin = errorMsg => {
-    setErrorMsg(errorMsg)
-    setShowErrorMsg(true)
+  onFailureLogin = errorMsg => {
+    this.setState({ errorMsg, showErrorMsg: true })
   }
 
-  const onSubmitForm = async event => {
+  onSubmitForm = async event => {
     event.preventDefault()
-    let { usernameInput, passwordInput } = state
+    let { usernameInput, passwordInput } = this.state
 
     if (usernameInput.toLowerCase().trim('') === 'tarun')
       usernameInput = 'rahul'
@@ -51,72 +52,91 @@ const Login = () => {
     const data = await response.json()
 
     if (response.ok === true) {
-      onSuccessLogin(data.jwt_token)
+      this.onSuccessLogin(data.jwt_token)
     } else {
-      onFailureLogin(data.error_msg)
+      this.onFailureLogin(data.error_msg)
     }
   }
 
-  const updateUsername = event => setUsernameInput(event.target.value)
-  const updatePassword = event => setPasswordInput(event.target.value)
-  const toggleShowPassword = () => setShowPassword(prevState => !prevState)
+  updateUsername = event => this.setState({ usernameInput: event.target.value })
 
-  const renderUsernameField = () => (
-    <InputFieldContainer>
-      <LoginInputFieldLabel htmlFor="username">USERNAME</LoginInputFieldLabel>
-      <LoginInputField
-        type="text"
-        value={usernameInput}
-        placeholder="tarun"
-        id="username"
-        onChange={updateUsername}
-      />
-    </InputFieldContainer>
-  )
+  updatePassword = event => this.setState({ passwordInput: event.target.value })
 
-  const renderPasswordField = () => (
-    <InputFieldContainer>
-      <LoginInputFieldLabel htmlFor="password">PASSWORD</LoginInputFieldLabel>
-      <LoginInputField
-        type={showPassword ? 'text' : 'password'}
-        value={passwordInput}
-        placeholder="tarun@9849"
-        id="password"
-        onChange={updatePassword}
-      />
-      <CheckboxContainer>
-        <ShowPasswordCheckbox
-          type="checkbox"
-          id="inputCheck"
-          checked={showPassword}
-          onChange={toggleShowPassword}
-        />
-        <CheckboxLabel htmlFor="inputCheck">Show Password</CheckboxLabel>
-      </CheckboxContainer>
-    </InputFieldContainer>
-  )
-
-  const jwtToken = Cookies.get('jwt_token')
-  if (jwtToken !== undefined) {
-    return <Navigate to="/" />
+  toggleShowPassword = () => {
+    this.setState(prevState => ({ showPassword: !prevState.showPassword }))
   }
 
-  return (
-    <LoginContainer>
-      <LoginForm onSubmit={onSubmitForm}>
-        <LogoImg
-          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
-          alt="website logo"
+  renderUsernameField = () => {
+    const { usernameInput } = this.state
+    return (
+      <InputFieldContainer>
+        <LoginInputFieldLabel htmlFor="username">USERNAME</LoginInputFieldLabel>
+        <LoginInputField
+          type="text"
+          value={usernameInput}
+          placeholder="tarun"
+          id="username"
+          onChange={this.updateUsername}
         />
-        {renderUsernameField()}
-        {renderPasswordField()}
-        <LoginButton type="submit" color="#ffffff">
-          Login
-        </LoginButton>
-        {showErrorMsg && <ErrorMsgStyle>*{errorMsg}</ErrorMsgStyle>}
-      </LoginForm>
-    </LoginContainer>
-  )
+      </InputFieldContainer>
+    )
+  }
+
+  renderPasswordField = () => {
+    const { passwordInput, showPassword } = this.state
+    return (
+      <InputFieldContainer>
+        <LoginInputFieldLabel htmlFor="password">PASSWORD</LoginInputFieldLabel>
+        <LoginInputField
+          type={showPassword ? 'text' : 'password'}
+          value={passwordInput}
+          placeholder="tarun@9849"
+          id="password"
+          onChange={this.updatePassword}
+        />
+        <CheckboxContainer>
+          <ShowPasswordCheckbox
+            type="checkbox"
+            id="inputCheck"
+            checked={showPassword}
+            onChange={this.toggleShowPassword}
+          />
+          <CheckboxLabel htmlFor="inputCheck">Show Password</CheckboxLabel>
+        </CheckboxContainer>
+      </InputFieldContainer>
+    )
+  }
+
+  render() {
+    const jwtToken = Cookies.get('jwt_token')
+    if (jwtToken !== undefined) {
+      return <Navigate to="/" /> // Navigate to home page if token exists
+    }
+
+    // Redirect to home page after successful login
+    if (this.state.redirectToHome) {
+      return <Navigate to="/" />
+    }
+
+    const { errorMsg, showErrorMsg } = this.state
+
+    return (
+      <LoginContainer>
+        <LoginForm onSubmit={this.onSubmitForm}>
+          <LogoImg
+            src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
+            alt="website logo"
+          />
+          {this.renderUsernameField()}
+          {this.renderPasswordField()}
+          <LoginButton type="submit" color="#ffffff">
+            Login
+          </LoginButton>
+          {showErrorMsg && <ErrorMsgStyle>*{errorMsg}</ErrorMsgStyle>}
+        </LoginForm>
+      </LoginContainer>
+    )
+  }
 }
 
 export default Login
