@@ -16,7 +16,7 @@ class App extends Component {
   state = {
     savedVideos: JSON.parse(localStorage.getItem('savedVideos')) || [],
     isDarkTheme: JSON.parse(localStorage.getItem('isDarkTheme')) || false,
-    activeTab: 'Home',
+    activeTab: localStorage.getItem('activeTab') || 'Home',
   }
 
   componentDidUpdate(prevState) {
@@ -25,6 +25,9 @@ class App extends Component {
     }
     if (prevState.isDarkTheme !== this.state.savedVideos) {
       localStorage.setItem('isDarkTheme', JSON.stringify(this.state.isDarkTheme))
+    }
+    if (prevState.activeTab !== this.state.activeTab) {
+      localStorage.setItem('activeTab', this.state.activeTab)
     }
   }
 
