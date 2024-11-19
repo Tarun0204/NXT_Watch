@@ -15,13 +15,16 @@ import './App.css'
 class App extends Component {
   state = {
     savedVideos: JSON.parse(localStorage.getItem('savedVideos')) || [],
-    isDarkTheme: false,
+    isDarkTheme: JSON.parse(localStorage.getItem('isDarkTheme')) || false,
     activeTab: 'Home',
   }
 
   componentDidUpdate(prevState) {
     if (prevState.savedVideos !== this.state.savedVideos) {
       localStorage.setItem('savedVideos', JSON.stringify(this.state.savedVideos))
+    }
+    if (prevState.isDarkTheme !== this.state.savedVideos) {
+      localStorage.setItem('isDarkTheme', JSON.stringify(this.state.isDarkTheme))
     }
   }
 
