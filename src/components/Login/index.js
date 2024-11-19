@@ -1,6 +1,6 @@
-import { Component } from 'react'
+import { useState } from 'react'
 import Cookies from 'js-cookie'
-import { withRouter } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   InputFieldContainer,
   LoginInputFieldLabel,
@@ -15,28 +15,27 @@ import {
   CheckboxLabel,
 } from './styledComponents'
 
-class Login extends Component {
-  state = {
-    usernameInput: '',
-    passwordInput: '',
-    errorMsg: '',
-    showErrorMsg: false,
-    showPassword: false,
-  }
+const Login = () => {
+  const [usernameInput, setUsernameInput] = useState('')
+  const [passwordInput, setPasswordInput] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [showErrorMsg, setShowErrorMsg] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
 
-  onSuccessLogin = jwtToken => {
+  const onSuccessLogin = jwtToken => {
     Cookies.set('jwt_token', jwtToken, { expires: 30 })
-    const { history } = this.props
-    history.replace('/')
+    navigate('/')
   }
 
-  onFailureLogin = errorMsg => {
-    this.setState({ errorMsg, showErrorMsg: true })
+  const onFailureLogin = errorMsg => {
+    setErrorMsg(errorMsg)
+    setShowErrorMsg(true)
   }
 
-  onSubmitForm = async event => {
+  const onSubmitForm = async event => {
     event.preventDefault()
-    let { usernameInput, passwordInput } = this.state
+    let { usernameInput, passwordInput } = state
 
     if (usernameInput.toLowerCase().trim('') === 'tarun')
       usernameInput = 'rahul'
@@ -52,85 +51,72 @@ class Login extends Component {
     const data = await response.json()
 
     if (response.ok === true) {
-      this.onSuccessLogin(data.jwt_token)
+      onSuccessLogin(data.jwt_token)
     } else {
-      this.onFailureLogin(data.error_msg)
+      onFailureLogin(data.error_msg)
     }
   }
 
-  updateUsername = event => this.setState({ usernameInput: event.target.value })
+  const updateUsername = event => setUsernameInput(event.target.value)
+  const updatePassword = event => setPasswordInput(event.target.value)
+  const toggleShowPassword = () => setShowPassword(prevState => !prevState)
 
-  updatePassword = event => this.setState({ passwordInput: event.target.value })
+  const renderUsernameField = () => (
+    <InputFieldContainer>
+      <LoginInputFieldLabel htmlFor="username">USERNAME</LoginInputFieldLabel>
+      <LoginInputField
+        type="text"
+        value={usernameInput}
+        placeholder="tarun"
+        id="username"
+        onChange={updateUsername}
+      />
+    </InputFieldContainer>
+  )
 
-  toggleShowPassword = () => {
-    this.setState(prevState => ({ showPassword: !prevState.showPassword }))
-  }
-
-  renderUsernameField = () => {
-    const { usernameInput } = this.state
-    return (
-      <InputFieldContainer>
-        <LoginInputFieldLabel htmlFor="username">USERNAME</LoginInputFieldLabel>
-        <LoginInputField
-          type="text"
-          value={usernameInput}
-          placeholder="tarun"
-          id="username"
-          onChange={this.updateUsername}
+  const renderPasswordField = () => (
+    <InputFieldContainer>
+      <LoginInputFieldLabel htmlFor="password">PASSWORD</LoginInputFieldLabel>
+      <LoginInputField
+        type={showPassword ? 'text' : 'password'}
+        value={passwordInput}
+        placeholder="tarun@9849"
+        id="password"
+        onChange={updatePassword}
+      />
+      <CheckboxContainer>
+        <ShowPasswordCheckbox
+          type="checkbox"
+          id="inputCheck"
+          checked={showPassword}
+          onChange={toggleShowPassword}
         />
-      </InputFieldContainer>
-    )
+        <CheckboxLabel htmlFor="inputCheck">Show Password</CheckboxLabel>
+      </CheckboxContainer>
+    </InputFieldContainer>
+  )
+
+  const jwtToken = Cookies.get('jwt_token')
+  if (jwtToken !== undefined) {
+    return <Navigate to="/" />
   }
 
-  renderPasswordField = () => {
-    const { passwordInput, showPassword } = this.state
-    return (
-      <InputFieldContainer>
-        <LoginInputFieldLabel htmlFor="password">PASSWORD</LoginInputFieldLabel>
-        <LoginInputField
-          type={showPassword ? 'text' : 'password'}
-          value={passwordInput}
-          placeholder="tarun@9849"
-          id="password"
-          onChange={this.updatePassword}
+  return (
+    <LoginContainer>
+      <LoginForm onSubmit={onSubmitForm}>
+        <LogoImg
+          src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
+          alt="website logo"
         />
-        <CheckboxContainer>
-          <ShowPasswordCheckbox
-            type="checkbox"
-            id="inputCheck"
-            checked={showPassword}
-            onChange={this.toggleShowPassword}
-          />
-          <CheckboxLabel htmlFor="inputCheck">Show Password</CheckboxLabel>
-        </CheckboxContainer>
-      </InputFieldContainer>
-    )
-  }
-
-  render() {
-    const jwtToken = Cookies.get('jwt_token')
-    if (jwtToken !== undefined) {
-      return <Navigate to="/" />
-    }
-    const { errorMsg, showErrorMsg } = this.state
-
-    return (
-      <LoginContainer>
-        <LoginForm onSubmit={this.onSubmitForm}>
-          <LogoImg
-            src="https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png"
-            alt="website logo"
-          />
-          {this.renderUsernameField()}
-          {this.renderPasswordField()}
-          <LoginButton type="submit" color="#ffffff">
-            Login
-          </LoginButton>
-          {showErrorMsg && <ErrorMsgStyle>*{errorMsg}</ErrorMsgStyle>}
-        </LoginForm>
-      </LoginContainer>
-    )
-  }
+        {renderUsernameField()}
+        {renderPasswordField()}
+        <LoginButton type="submit" color="#ffffff">
+          Login
+        </LoginButton>
+        {showErrorMsg && <ErrorMsgStyle>*{errorMsg}</ErrorMsgStyle>}
+      </LoginForm>
+    </LoginContainer>
+  )
 }
 
-export default withRouter(Login)
+export default Login
