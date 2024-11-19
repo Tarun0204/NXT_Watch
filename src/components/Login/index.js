@@ -22,12 +22,12 @@ class Login extends Component {
     errorMsg: '',
     showErrorMsg: false,
     showPassword: false,
-    redirectToHome: false, // New state for redirection
+    redirectToHome: false,
   }
 
   onSuccessLogin = jwtToken => {
     Cookies.set('jwt_token', jwtToken, { expires: 30 })
-    this.setState({ redirectToHome: true }) // Set to true when login is successful
+    this.setState({ redirectToHome: true })
   }
 
   onFailureLogin = errorMsg => {
@@ -110,10 +110,9 @@ class Login extends Component {
   render() {
     const jwtToken = Cookies.get('jwt_token')
     if (jwtToken !== undefined) {
-      return <Navigate to="/" /> // Navigate to home page if token exists
+      return <Navigate to="/" />
     }
 
-    // Redirect to home page after successful login
     if (this.state.redirectToHome) {
       return <Navigate to="/" />
     }
